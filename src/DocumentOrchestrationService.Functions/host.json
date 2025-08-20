@@ -10,8 +10,8 @@
     "logLevel": {
       "default": "Information",
       "DocumentOrchestrationService": "Information",
-      "Microsoft.Azure.Functions.Worker": "Warning",
-      "Microsoft.Azure.WebJobs": "Warning",
+      "Microsoft.Azure.Functions.Worker": "Information",
+      "Microsoft.Azure.WebJobs": "Information",
       "Host.Results": "Information"
     }
   },
