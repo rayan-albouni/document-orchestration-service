@@ -1,18 +1,15 @@
 {
   "version": "2.0",
   "logging": {
-    "applicationInsights": {
-      "samplingSettings": {
-        "isEnabled": true,
-        "excludedTypes": "Request"
-      }
-    },
     "logLevel": {
       "default": "Information",
       "DocumentOrchestrationService": "Information",
       "Microsoft.Azure.Functions.Worker": "Information",
       "Microsoft.Azure.WebJobs": "Information",
-      "Host.Results": "Information"
+      "Host.Results": "Information",
+      "Host.Aggregator": "Information",
+      "Host.General": "Information",
+      "Function": "Information"
     }
   },
   "extensionBundle": {
