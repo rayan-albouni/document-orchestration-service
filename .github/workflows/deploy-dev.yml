@@ -1,7 +1,7 @@
 # Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy dotnet core app to Azure Function App - fn-document-orchestration-service
+name: Build and deploy Azure Function
 
 on:
   push:
@@ -41,6 +41,23 @@ jobs:
         with:
           creds: ${{ secrets.AZ_CREDS }}
 
+      - name: Get GitHub Runner IP
+        id: get-ip
+        run: |
+          RUNNER_IP=$(curl -s https://api.ipify.org)
+          echo "runner-ip=$RUNNER_IP" >> $GITHUB_OUTPUT
+          echo "GitHub Runner IP: $RUNNER_IP"
+
+      - name: Add IP to Function App Access Restrictions
+        run: |
+          az functionapp config access-restriction add \
+            --resource-group rg-document-parsing \
+            --name 'fn-document-orchestration-service' \
+            --rule-name 'GitHubRunner' \
+            --action Allow \
+            --ip-address ${{ steps.get-ip.outputs.runner-ip }}/32 \
+            --priority 99
+
       - name: 'Run Azure Functions Action'
         uses: Azure/functions-action@v1
         id: fa
@@ -48,4 +65,12 @@ jobs:
           app-name: 'fn-document-orchestration-service'
           slot-name: 'Production'
           package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
+
+      - name: Remove IP from Function App Access Restrictions
+        if: always()
+        run: |
+          az functionapp config access-restriction remove \
+            --resource-group rg-document-parsing \
+            --name 'fn-document-orchestration-service' \
+            --rule-name 'GitHubRunner'
           
