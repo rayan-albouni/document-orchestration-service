@@ -4,16 +4,20 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Azure.Functions.Worker;
+using Microsoft.ApplicationInsights.Extensibility;
 using DocumentOrchestrationService.Domain.Repositories;
 using DocumentOrchestrationService.Domain.Services;
 using DocumentOrchestrationService.Infrastructure.Repositories;
 using DocumentOrchestrationService.Infrastructure.Services;
 
-var host = new HostBuilder()
+var host = Host.CreateDefaultBuilder(args)
     .ConfigureFunctionsWorkerDefaults()
     .ConfigureServices((context, services) =>
     {
         var configuration = context.Configuration;
+
+        // Add Application Insights telemetry
+        services.AddApplicationInsightsTelemetryWorkerService();
 
         services.AddSingleton<CosmosClient>(serviceProvider =>
         {
@@ -37,4 +41,4 @@ var host = new HostBuilder()
     })
     .Build();
 
-host.Run();
+await host.RunAsync();
