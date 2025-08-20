@@ -10,7 +10,7 @@ public class ProcessingJobRepository : IProcessingJobRepository
 
     public ProcessingJobRepository(CosmosClient cosmosClient, string databaseName)
     {
-        _container = cosmosClient.GetContainer(databaseName, "ProcessingJobs");
+        _container = cosmosClient.GetContainer(databaseName, "Documents");
     }
 
     public async Task<ProcessingJob?> GetByIdAsync(string id)

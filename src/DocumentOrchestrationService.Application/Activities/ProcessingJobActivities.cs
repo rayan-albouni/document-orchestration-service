@@ -39,6 +39,11 @@ public class ProcessingJobActivities
         {
             DocumentId = input.DocumentId,
             TenantId = input.TenantId,
+            BlobUrl = input.BlobUrl,
+            DocumentType = input.DocumentType,
+            SourceSystem = input.SourceSystem,
+            UserId = input.UserId,
+            ClientReferenceId = input.ClientReferenceId,
             OverallStatus = ProcessingStatus.Processing
         };
 
@@ -51,7 +56,7 @@ public class ProcessingJobActivities
         var job = await _repository.GetByIdAsync(jobId);
         if (job == null) throw new InvalidOperationException($"Job {jobId} not found");
 
-        return await _classificationService.ClassifyDocumentAsync(job.DocumentId, job.TenantId);
+        return await _classificationService.ClassifyDocumentAsync(job.DocumentId, job.BlobUrl, job.TenantId);
     }
 
     [Function("UpdateJobClassification")]
@@ -71,7 +76,7 @@ public class ProcessingJobActivities
         var job = await _repository.GetByIdAsync(input.jobId);
         if (job == null) throw new InvalidOperationException($"Job {input.jobId} not found");
 
-        return await _extractionService.ExtractDataAsync(job.DocumentId, job.TenantId, input.documentType);
+        return await _extractionService.ExtractDataAsync(job.DocumentId, job.BlobUrl, job.TenantId, input.documentType);
     }
 
     [Function("UpdateJobExtraction")]

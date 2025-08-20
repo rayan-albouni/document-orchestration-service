@@ -16,9 +16,9 @@ public class DocumentClassificationService : IDocumentClassificationService
         _baseUrl = configuration["DocumentClassificationServiceUrl"] ?? throw new InvalidOperationException("DocumentClassificationServiceUrl not configured");
     }
 
-    public async Task<string> ClassifyDocumentAsync(string documentId, string tenantId)
+    public async Task<string> ClassifyDocumentAsync(string documentId, string blobUrl, string tenantId)
     {
-        var request = new { DocumentId = documentId, TenantId = tenantId };
+        var request = new { DocumentId = documentId, BlobUrl = blobUrl, TenantId = tenantId };
         var json = JsonConvert.SerializeObject(request);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 

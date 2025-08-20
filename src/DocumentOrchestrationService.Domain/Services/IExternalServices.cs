@@ -2,12 +2,12 @@ namespace DocumentOrchestrationService.Domain.Services;
 
 public interface IDocumentClassificationService
 {
-    Task<string> ClassifyDocumentAsync(string documentId, string tenantId);
+    Task<string> ClassifyDocumentAsync(string documentId, string blobUrl, string tenantId);
 }
 
 public interface IDocumentExtractionService
 {
-    Task<string> ExtractDataAsync(string documentId, string tenantId, string documentType);
+    Task<string> ExtractDataAsync(string documentId, string blobUrl, string tenantId, string documentType);
 }
 
 public interface IDataValidationService

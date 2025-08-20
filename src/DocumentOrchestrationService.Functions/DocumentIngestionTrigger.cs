@@ -1,7 +1,7 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.DurableTask.Client;
 using Newtonsoft.Json;
-using DocumentOrchestrationService.Domain.ValueObjects;
+using DocumentOrchestrationService.Functions.Models;
 
 namespace DocumentOrchestrationService.Functions;
 
@@ -12,9 +12,10 @@ public class DocumentIngestionTrigger
         [ServiceBusTrigger("document-ingestion-queue", Connection = "ServiceBusConnectionString")] string message,
         [DurableClient] DurableTaskClient client)
     {
-        var documentMessage = JsonConvert.DeserializeObject<DocumentMessage>(message);
-        if (documentMessage == null) return;
+        var documentMessageDto = JsonConvert.DeserializeObject<DocumentMessageDto>(message);
+        if (documentMessageDto == null) return;
 
+        var documentMessage = documentMessageDto.ToDomainObject();
         var instanceId = await client.ScheduleNewOrchestrationInstanceAsync(
             "DocumentProcessingOrchestrator",
             documentMessage);

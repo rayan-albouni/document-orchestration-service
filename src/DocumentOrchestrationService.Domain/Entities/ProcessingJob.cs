@@ -5,6 +5,11 @@ public class ProcessingJob
     public string Id { get; set; } = Guid.NewGuid().ToString();
     public string DocumentId { get; set; } = string.Empty;
     public string TenantId { get; set; } = string.Empty;
+    public string BlobUrl { get; set; } = string.Empty;
+    public string? DocumentType { get; set; }
+    public string SourceSystem { get; set; } = string.Empty;
+    public string UserId { get; set; } = string.Empty;
+    public string ClientReferenceId { get; set; } = string.Empty;
     public ProcessingStatus OverallStatus { get; set; } = ProcessingStatus.Processing;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;

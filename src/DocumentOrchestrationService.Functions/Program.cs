@@ -16,14 +16,14 @@ var host = new HostBuilder()
 
         services.AddSingleton<CosmosClient>(serviceProvider =>
         {
-            var connectionString = configuration["CosmosDbConnectionString"];
+            var connectionString = configuration["CosmosDbConnectionString"] ?? throw new InvalidOperationException("CosmosDbConnectionString is not configured.");
             return new CosmosClient(connectionString);
         });
 
         services.AddScoped<IProcessingJobRepository>(serviceProvider =>
         {
             var cosmosClient = serviceProvider.GetRequiredService<CosmosClient>();
-            var databaseName = configuration["CosmosDbDatabaseName"] ?? "DocumentProcessing";
+            var databaseName = configuration["CosmosDbDatabaseName"] ?? throw new InvalidOperationException("CosmosDbDatabaseName is not configured.");
             return new ProcessingJobRepository(cosmosClient, databaseName);
         });
 

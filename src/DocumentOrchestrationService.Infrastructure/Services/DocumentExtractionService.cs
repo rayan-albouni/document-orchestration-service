@@ -16,9 +16,9 @@ public class DocumentExtractionService : IDocumentExtractionService
         _baseUrl = configuration["DocumentExtractionServiceUrl"] ?? throw new InvalidOperationException("DocumentExtractionServiceUrl not configured");
     }
 
-    public async Task<string> ExtractDataAsync(string documentId, string tenantId, string documentType)
+    public async Task<string> ExtractDataAsync(string documentId, string blobUrl, string tenantId, string documentType)
     {
-        var request = new { DocumentId = documentId, TenantId = tenantId, DocumentType = documentType };
+        var request = new { DocumentId = documentId, BlobUrl = blobUrl, TenantId = tenantId, DocumentType = documentType };
         var json = JsonConvert.SerializeObject(request);
         var content = new StringContent(json, Encoding.UTF8, "application/json");
 
