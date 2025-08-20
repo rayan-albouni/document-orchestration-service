@@ -1,6 +1,7 @@
 using System.Text;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using DocumentOrchestrationService.Domain.Services;
 
 namespace DocumentOrchestrationService.Infrastructure.Services;
@@ -9,24 +10,45 @@ public class DocumentClassificationService : IDocumentClassificationService
 {
     private readonly HttpClient _httpClient;
     private readonly string _baseUrl;
+    private readonly ILogger<DocumentClassificationService> _logger;
 
-    public DocumentClassificationService(HttpClient httpClient, IConfiguration configuration)
+    public DocumentClassificationService(HttpClient httpClient, IConfiguration configuration, ILogger<DocumentClassificationService> logger)
     {
         _httpClient = httpClient;
         _baseUrl = configuration["DocumentClassificationServiceUrl"] ?? throw new InvalidOperationException("DocumentClassificationServiceUrl not configured");
+        _logger = logger;
     }
 
     public async Task<string> ClassifyDocumentAsync(string documentId, string blobUrl, string tenantId)
     {
-        var request = new { DocumentId = documentId, BlobUrl = blobUrl, TenantId = tenantId };
-        var json = JsonConvert.SerializeObject(request);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
+        _logger.LogInformation("Classifying document {DocumentId} for tenant {TenantId} from blob {BlobUrl}", 
+            documentId, tenantId, blobUrl);
 
-        var response = await _httpClient.PostAsync($"{_baseUrl}/api/v1/classify", content);
-        response.EnsureSuccessStatusCode();
+        try
+        {
+            var request = new { DocumentId = documentId, BlobUrl = blobUrl, TenantId = tenantId };
+            var json = JsonConvert.SerializeObject(request);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-        var responseContent = await response.Content.ReadAsStringAsync();
-        var result = JsonConvert.DeserializeObject<dynamic>(responseContent);
-        return result?.documentType?.ToString() ?? "unknown";
+            var response = await _httpClient.PostAsync($"{_baseUrl}/api/v1/classify", content);
+            response.EnsureSuccessStatusCode();
+
+            var responseContent = await response.Content.ReadAsStringAsync();
+            var result = JsonConvert.DeserializeObject<dynamic>(responseContent);
+            string documentType = result?.documentType?.ToString() ?? "unknown";
+            
+            _logger.LogInformation("Document {DocumentId} classified as type: {DocumentType}", documentId, documentType);
+            return documentType;
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogError(ex, "HTTP error classifying document {DocumentId}", documentId);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error classifying document {DocumentId}", documentId);
+            throw;
+        }
     }
 }

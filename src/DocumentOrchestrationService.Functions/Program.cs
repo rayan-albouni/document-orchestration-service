@@ -2,6 +2,7 @@ using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Azure.Functions.Worker;
 using DocumentOrchestrationService.Domain.Repositories;
 using DocumentOrchestrationService.Domain.Services;
@@ -23,8 +24,9 @@ var host = new HostBuilder()
         services.AddScoped<IProcessingJobRepository>(serviceProvider =>
         {
             var cosmosClient = serviceProvider.GetRequiredService<CosmosClient>();
+            var logger = serviceProvider.GetRequiredService<ILogger<ProcessingJobRepository>>();
             var databaseName = configuration["CosmosDbDatabaseName"] ?? throw new InvalidOperationException("CosmosDbDatabaseName is not configured.");
-            return new ProcessingJobRepository(cosmosClient, databaseName);
+            return new ProcessingJobRepository(cosmosClient, databaseName, logger);
         });
 
         services.AddHttpClient<IDocumentClassificationService, DocumentClassificationService>();

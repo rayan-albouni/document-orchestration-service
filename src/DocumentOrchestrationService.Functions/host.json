@@ -6,6 +6,13 @@
         "isEnabled": true,
         "excludedTypes": "Request"
       }
+    },
+    "logLevel": {
+      "default": "Information",
+      "DocumentOrchestrationService": "Information",
+      "Microsoft.Azure.Functions.Worker": "Warning",
+      "Microsoft.Azure.WebJobs": "Warning",
+      "Host.Results": "Information"
     }
   },
   "extensionBundle": {

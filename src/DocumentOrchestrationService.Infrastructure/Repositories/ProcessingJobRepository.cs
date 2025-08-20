@@ -1,4 +1,5 @@
 using Microsoft.Azure.Cosmos;
+using Microsoft.Extensions.Logging;
 using DocumentOrchestrationService.Domain.Entities;
 using DocumentOrchestrationService.Domain.Repositories;
 
@@ -7,10 +8,12 @@ namespace DocumentOrchestrationService.Infrastructure.Repositories;
 public class ProcessingJobRepository : IProcessingJobRepository
 {
     private readonly Container _container;
+    private readonly ILogger<ProcessingJobRepository> _logger;
 
-    public ProcessingJobRepository(CosmosClient cosmosClient, string databaseName)
+    public ProcessingJobRepository(CosmosClient cosmosClient, string databaseName, ILogger<ProcessingJobRepository> logger)
     {
         _container = cosmosClient.GetContainer(databaseName, "Documents");
+        _logger = logger;
     }
 
     public async Task<ProcessingJob?> GetByIdAsync(string id)
@@ -38,12 +41,20 @@ public class ProcessingJobRepository : IProcessingJobRepository
 
     public async Task<ProcessingJob> CreateAsync(ProcessingJob job)
     {
+        _logger.LogInformation("Creating processing job {JobId} for document {DocumentId}", job.Id, job.DocumentId);
+        
         var response = await _container.CreateItemAsync(job, new PartitionKey(job.Id));
+        
+        _logger.LogInformation("Successfully created processing job {JobId} for document {DocumentId}", 
+            job.Id, job.DocumentId);
+        
         return response.Resource;
     }
 
     public async Task<ProcessingJob> UpdateAsync(ProcessingJob job)
     {
+        _logger.LogDebug("Updating processing job {JobId} with status {Status}", job.Id, job.OverallStatus);
+        
         job.UpdatedAt = DateTime.UtcNow;
         var response = await _container.ReplaceItemAsync(job, job.Id, new PartitionKey(job.Id));
         return response.Resource;

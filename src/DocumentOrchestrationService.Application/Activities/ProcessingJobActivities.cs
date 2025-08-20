@@ -1,5 +1,6 @@
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.DurableTask;
+using Microsoft.Extensions.Logging;
 using DocumentOrchestrationService.Domain.Entities;
 using DocumentOrchestrationService.Domain.ValueObjects;
 using DocumentOrchestrationService.Domain.Repositories;
@@ -15,6 +16,7 @@ public class ProcessingJobActivities
     private readonly IDataValidationService _validationService;
     private readonly IHumanReviewService _humanReviewService;
     private readonly IProcessedDataService _processedDataService;
+    private readonly ILogger<ProcessingJobActivities> _logger;
 
     public ProcessingJobActivities(
         IProcessingJobRepository repository,
@@ -22,7 +24,8 @@ public class ProcessingJobActivities
         IDocumentExtractionService extractionService,
         IDataValidationService validationService,
         IHumanReviewService humanReviewService,
-        IProcessedDataService processedDataService)
+        IProcessedDataService processedDataService,
+        ILogger<ProcessingJobActivities> logger)
     {
         _repository = repository;
         _classificationService = classificationService;
@@ -30,11 +33,15 @@ public class ProcessingJobActivities
         _validationService = validationService;
         _humanReviewService = humanReviewService;
         _processedDataService = processedDataService;
+        _logger = logger;
     }
 
     [Function("CreateProcessingJob")]
     public async Task<ProcessingJob> CreateProcessingJob([ActivityTrigger] DocumentMessage input)
     {
+        _logger.LogInformation("Creating processing job for document {DocumentId} from {SourceSystem}", 
+            input.DocumentId, input.SourceSystem);
+
         var job = new ProcessingJob
         {
             DocumentId = input.DocumentId,
@@ -47,16 +54,38 @@ public class ProcessingJobActivities
             OverallStatus = ProcessingStatus.Processing
         };
 
-        return await _repository.CreateAsync(job);
+        var createdJob = await _repository.CreateAsync(job);
+        _logger.LogInformation("Created processing job {JobId} for document {DocumentId}", 
+            createdJob.Id, input.DocumentId);
+        
+        return createdJob;
     }
 
     [Function("ClassifyDocument")]
     public async Task<string> ClassifyDocument([ActivityTrigger] string jobId)
     {
+        _logger.LogInformation("Starting classification for job {JobId}", jobId);
+        
         var job = await _repository.GetByIdAsync(jobId);
-        if (job == null) throw new InvalidOperationException($"Job {jobId} not found");
+        if (job == null) 
+        {
+            _logger.LogError("Job {JobId} not found during classification", jobId);
+            throw new InvalidOperationException($"Job {jobId} not found");
+        }
 
-        return await _classificationService.ClassifyDocumentAsync(job.DocumentId, job.BlobUrl, job.TenantId);
+        try
+        {
+            var result = await _classificationService.ClassifyDocumentAsync(job.DocumentId, job.BlobUrl, job.TenantId);
+            _logger.LogInformation("Document {DocumentId} classified as {DocumentType}", 
+                job.DocumentId, result);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to classify document {DocumentId} for job {JobId}", 
+                job.DocumentId, jobId);
+            throw;
+        }
     }
 
     [Function("UpdateJobClassification")]
@@ -73,10 +102,29 @@ public class ProcessingJobActivities
     [Function("ExtractData")]
     public async Task<string> ExtractData([ActivityTrigger] (string jobId, string documentType) input)
     {
+        _logger.LogInformation("Starting data extraction for job {JobId} with document type {DocumentType}", 
+            input.jobId, input.documentType);
+            
         var job = await _repository.GetByIdAsync(input.jobId);
-        if (job == null) throw new InvalidOperationException($"Job {input.jobId} not found");
+        if (job == null) 
+        {
+            _logger.LogError("Job {JobId} not found during data extraction", input.jobId);
+            throw new InvalidOperationException($"Job {input.jobId} not found");
+        }
 
-        return await _extractionService.ExtractDataAsync(job.DocumentId, job.BlobUrl, job.TenantId, input.documentType);
+        try
+        {
+            var result = await _extractionService.ExtractDataAsync(job.DocumentId, job.BlobUrl, job.TenantId, input.documentType);
+            _logger.LogInformation("Successfully extracted data for document {DocumentId}, size: {DataSize} characters", 
+                job.DocumentId, result.Length);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to extract data from document {DocumentId} for job {JobId}", 
+                job.DocumentId, input.jobId);
+            throw;
+        }
     }
 
     [Function("UpdateJobExtraction")]
