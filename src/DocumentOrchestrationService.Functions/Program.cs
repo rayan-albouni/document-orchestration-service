@@ -10,7 +10,8 @@ using Microsoft.Extensions.Logging;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 builder.ConfigureFunctionsWebApplication();
-builder.Services.AddApplicationInsightsTelemetryWorkerService();
+builder.Services.AddApplicationInsightsTelemetryWorkerService(); 
+builder.Logging.AddApplicationInsights();
 
 var cosmosDbConnectionString = builder.Configuration["CosmosDbConnectionString"] ?? throw new InvalidOperationException("CosmosDbConnectionString is not configured.");
 var cosmosDbDatabaseId = builder.Configuration["CosmosDbDatabaseId"] ?? throw new InvalidOperationException("CosmosDbDatabaseId is not configured.");
