@@ -10,9 +10,9 @@ public class ProcessingJobRepository : IProcessingJobRepository
     private readonly Container _container;
     private readonly ILogger<ProcessingJobRepository> _logger;
 
-    public ProcessingJobRepository(CosmosClient cosmosClient, string databaseName, ILogger<ProcessingJobRepository> logger)
+    public ProcessingJobRepository(CosmosClient cosmosClient, string databaseId, string containerId, ILogger<ProcessingJobRepository> logger)
     {
-        _container = cosmosClient.GetContainer(databaseName, "Documents");
+        _container = cosmosClient.GetContainer(databaseId, containerId);
         _logger = logger;
     }
 
