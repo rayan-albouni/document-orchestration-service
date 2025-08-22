@@ -51,22 +51,22 @@ public class DocumentProcessingOrchestrator
             var job = await context.CallActivityAsync<ProcessingJob>("CreateProcessingJob", input);
             logger.LogInformation("Created processing job {JobId} for document {DocumentId}", job.Id, input.DocumentId);
 
-            var classificationResult = await context.CallActivityAsync<string>("ClassifyDocument", job.Id);
-            await context.CallActivityAsync("UpdateJobClassification", (jobId: job.Id, classificationResult: classificationResult));
+            var classificationResult = await context.CallActivityAsync<string>("ClassifyDocument", (jobId: job.Id, tenantId: job.TenantId));
+            await context.CallActivityAsync("UpdateJobClassification", (jobId: job.Id, tenantId: job.TenantId, classificationResult: classificationResult));
             logger.LogInformation("Classified document {DocumentId} as {DocumentType}", input.DocumentId, classificationResult);
 
-            var extractionResult = await context.CallActivityAsync<string>("ExtractData", (jobId: job.Id, documentType: classificationResult));
-            await context.CallActivityAsync("UpdateJobExtraction", (jobId: job.Id, extractionResult: extractionResult));
+            var extractionResult = await context.CallActivityAsync<string>("ExtractData", (jobId: job.Id, tenantId: job.TenantId, documentType: classificationResult));
+            await context.CallActivityAsync("UpdateJobExtraction", (jobId: job.Id, tenantId: job.TenantId, extractionResult: extractionResult));
             logger.LogInformation("Extracted data for document {DocumentId}", input.DocumentId);
 
             var validationResult = await context.CallActivityAsync<(string result, bool requiresReview)>("ValidateData", (extractionResult: extractionResult, documentType: classificationResult));
-            await context.CallActivityAsync("UpdateJobValidation", (jobId: job.Id, validationResult: validationResult.result, requiresReview: validationResult.requiresReview));
+            await context.CallActivityAsync("UpdateJobValidation", (jobId: job.Id, tenantId: job.TenantId, validationResult: validationResult.result, requiresReview: validationResult.requiresReview));
 
             if (validationResult.requiresReview)
             {
                 logger.LogInformation("Document {DocumentId} requires human review", input.DocumentId);
                 var reviewTaskId = await context.CallActivityAsync<string>("CreateReviewTask", (jobId: job.Id, extractedData: extractionResult, validationResult: validationResult.result));
-                await context.CallActivityAsync("UpdateJobReviewTask", (jobId: job.Id, reviewTaskId: reviewTaskId));
+                await context.CallActivityAsync("UpdateJobReviewTask", (jobId: job.Id, tenantId: job.TenantId, reviewTaskId: reviewTaskId));
 
                 await context.CreateTimer(DateTime.UtcNow.AddMinutes(1), CancellationToken.None);
                 var isReviewComplete = await context.CallActivityAsync<bool>("CheckReviewStatus", reviewTaskId);
@@ -78,12 +78,12 @@ public class DocumentProcessingOrchestrator
                 }
 
                 extractionResult = await context.CallActivityAsync<string>("GetReviewResult", reviewTaskId);
-                await context.CallActivityAsync("UpdateJobReviewed", job.Id);
+                await context.CallActivityAsync("UpdateJobReviewed", (jobId: job.Id, tenantId: job.TenantId));
                 logger.LogInformation("Human review completed for document {DocumentId}", input.DocumentId);
             }
 
             var processedDataId = await context.CallActivityAsync<string>("StoreProcessedData", (jobId: job.Id, tenantId: input.TenantId, finalData: extractionResult));
-            await context.CallActivityAsync("CompleteJob", (jobId: job.Id, processedDataId: processedDataId));
+            await context.CallActivityAsync("CompleteJob", (jobId: job.Id, tenantId: job.TenantId, processedDataId: processedDataId));
 
             logger.LogInformation("Successfully completed processing for document {DocumentId}", input.DocumentId);
             return "Processing completed successfully";

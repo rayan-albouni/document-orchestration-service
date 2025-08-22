@@ -15,12 +15,11 @@ public class ProcessingJobRepository : IProcessingJobRepository
         _container = cosmosClient.GetContainer(databaseId, containerId);
         _logger = logger;
     }
-
-    public async Task<ProcessingJob?> GetByIdAsync(string id)
+    public async Task<ProcessingJob?> GetByIdAndTenantIdAsync(string id, string tenantId)
     {
         try
         {
-            var response = await _container.ReadItemAsync<ProcessingJob>(id, new PartitionKey(id));
+            var response = await _container.ReadItemAsync<ProcessingJob>(id, new PartitionKey(tenantId));
             return response.Resource;
         }
         catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
@@ -31,7 +30,7 @@ public class ProcessingJobRepository : IProcessingJobRepository
 
     public async Task<ProcessingJob?> GetByDocumentIdAsync(string documentId)
     {
-        var query = new QueryDefinition("SELECT * FROM c WHERE c.DocumentId = @documentId")
+        var query = new QueryDefinition("SELECT * FROM c WHERE c.documentId = @documentId")
             .WithParameter("@documentId", documentId);
 
         var iterator = _container.GetItemQueryIterator<ProcessingJob>(query);
@@ -43,7 +42,7 @@ public class ProcessingJobRepository : IProcessingJobRepository
     {
         _logger.LogInformation("Creating processing job {JobId} for document {DocumentId}", job.Id, job.DocumentId);
         
-        var response = await _container.CreateItemAsync(job, new PartitionKey(job.Id));
+        var response = await _container.CreateItemAsync(job, new PartitionKey(job.TenantId));
         
         _logger.LogInformation("Successfully created processing job {JobId} for document {DocumentId}", 
             job.Id, job.DocumentId);
@@ -56,7 +55,7 @@ public class ProcessingJobRepository : IProcessingJobRepository
         _logger.LogDebug("Updating processing job {JobId} with status {Status}", job.Id, job.OverallStatus);
         
         job.UpdatedAt = DateTime.UtcNow;
-        var response = await _container.ReplaceItemAsync(job, job.Id, new PartitionKey(job.Id));
+        var response = await _container.ReplaceItemAsync(job, job.Id, new PartitionKey(job.TenantId));
         return response.Resource;
     }
 }

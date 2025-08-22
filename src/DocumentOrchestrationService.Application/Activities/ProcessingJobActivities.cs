@@ -65,15 +65,15 @@ public class ProcessingJobActivities
     }
 
     [Function("ClassifyDocument")]
-    public async Task<string> ClassifyDocument([ActivityTrigger] string jobId)
+    public async Task<string> ClassifyDocument([ActivityTrigger] (string jobId, string tenantId) input)
     {
-        _logger.LogInformation("Starting classification for job {JobId}", jobId);
+        _logger.LogInformation("Starting classification for job {JobId}", input.jobId);
         
-        var job = await _repository.GetByIdAsync(jobId);
+        var job = await _repository.GetByIdAndTenantIdAsync(input.jobId, input.tenantId);
         if (job == null) 
         {
-            _logger.LogError("Job {JobId} not found during classification", jobId);
-            throw new InvalidOperationException($"Job {jobId} not found");
+            _logger.LogError("Job {JobId} not found during classification", input.jobId);
+            throw new InvalidOperationException($"Job {input.jobId} not found");
         }
 
         try
@@ -86,15 +86,15 @@ public class ProcessingJobActivities
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to classify document {DocumentId} for job {JobId}", 
-                job.DocumentId, jobId);
+                job.DocumentId, input.jobId);
             throw;
         }
     }
 
     [Function("UpdateJobClassification")]
-    public async Task UpdateJobClassification([ActivityTrigger] (string jobId, string classificationResult) input)
+    public async Task UpdateJobClassification([ActivityTrigger] (string jobId, string tenantId, string classificationResult) input)
     {
-        var job = await _repository.GetByIdAsync(input.jobId);
+        var job = await _repository.GetByIdAndTenantIdAsync(input.jobId, input.tenantId);
         if (job == null) return;
 
         job.ClassificationResult = input.classificationResult;
@@ -103,12 +103,12 @@ public class ProcessingJobActivities
     }
 
     [Function("ExtractData")]
-    public async Task<string> ExtractData([ActivityTrigger] (string jobId, string documentType) input)
+    public async Task<string> ExtractData([ActivityTrigger] (string jobId, string tenantId, string documentType) input)
     {
         _logger.LogInformation("Starting data extraction for job {JobId} with document type {DocumentType}", 
             input.jobId, input.documentType);
-            
-        var job = await _repository.GetByIdAsync(input.jobId);
+
+        var job = await _repository.GetByIdAndTenantIdAsync(input.jobId, input.tenantId);
         if (job == null) 
         {
             _logger.LogError("Job {JobId} not found during data extraction", input.jobId);
@@ -131,9 +131,9 @@ public class ProcessingJobActivities
     }
 
     [Function("UpdateJobExtraction")]
-    public async Task UpdateJobExtraction([ActivityTrigger] (string jobId, string extractionResult) input)
+    public async Task UpdateJobExtraction([ActivityTrigger] (string jobId, string tenantId, string extractionResult) input)
     {
-        var job = await _repository.GetByIdAsync(input.jobId);
+        var job = await _repository.GetByIdAndTenantIdAsync(input.jobId, input.tenantId);
         if (job == null) return;
 
         job.ExtractionResult = input.extractionResult;
@@ -148,9 +148,9 @@ public class ProcessingJobActivities
     }
 
     [Function("UpdateJobValidation")]
-    public async Task UpdateJobValidation([ActivityTrigger] (string jobId, string validationResult, bool requiresReview) input)
+    public async Task UpdateJobValidation([ActivityTrigger] (string jobId, string tenantId, string validationResult, bool requiresReview) input)
     {
-        var job = await _repository.GetByIdAsync(input.jobId);
+        var job = await _repository.GetByIdAndTenantIdAsync(input.jobId, input.tenantId);
         if (job == null) return;
 
         job.ValidationResult = input.validationResult;
@@ -166,9 +166,9 @@ public class ProcessingJobActivities
     }
 
     [Function("UpdateJobReviewTask")]
-    public async Task UpdateJobReviewTask([ActivityTrigger] (string jobId, string reviewTaskId) input)
+    public async Task UpdateJobReviewTask([ActivityTrigger] (string jobId, string tenantId, string reviewTaskId) input)
     {
-        var job = await _repository.GetByIdAsync(input.jobId);
+        var job = await _repository.GetByIdAndTenantIdAsync(input.jobId, input.tenantId);
         if (job == null) return;
 
         job.HumanReviewTaskId = input.reviewTaskId;
@@ -188,9 +188,9 @@ public class ProcessingJobActivities
     }
 
     [Function("UpdateJobReviewed")]
-    public async Task UpdateJobReviewed([ActivityTrigger] string jobId)
+    public async Task UpdateJobReviewed([ActivityTrigger] (string jobId, string tenantId) input)
     {
-        var job = await _repository.GetByIdAsync(jobId);
+        var job = await _repository.GetByIdAndTenantIdAsync(input.jobId, input.tenantId);
         if (job == null) return;
 
         job.OverallStatus = ProcessingStatus.Reviewed;
@@ -200,16 +200,16 @@ public class ProcessingJobActivities
     [Function("StoreProcessedData")]
     public async Task<string> StoreProcessedData([ActivityTrigger] (string jobId, string tenantId, string finalData) input)
     {
-        var job = await _repository.GetByIdAsync(input.jobId);
+        var job = await _repository.GetByIdAndTenantIdAsync(input.jobId, input.tenantId);
         if (job == null) throw new InvalidOperationException($"Job {input.jobId} not found");
 
         return await _processedDataService.StoreAndIndexDataAsync(job.DocumentId, input.tenantId, input.finalData);
     }
 
     [Function("CompleteJob")]
-    public async Task CompleteJob([ActivityTrigger] (string jobId, string processedDataId) input)
+    public async Task CompleteJob([ActivityTrigger] (string jobId, string tenantId, string processedDataId) input)
     {
-        var job = await _repository.GetByIdAsync(input.jobId);
+        var job = await _repository.GetByIdAndTenantIdAsync(input.jobId, input.tenantId);
         if (job == null) return;
 
         job.ProcessedDataId = input.processedDataId;
