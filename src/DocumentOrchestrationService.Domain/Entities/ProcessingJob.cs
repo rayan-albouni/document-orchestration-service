@@ -1,60 +1,60 @@
-using System.Text.Json.Serialization;
+using Newtonsoft.Json;
 
 namespace DocumentOrchestrationService.Domain.Entities;
 
 public class ProcessingJob
 {
-    [JsonPropertyName("id")]
+    [JsonProperty(PropertyName = "id")]
     public string Id { get; set; } = Guid.NewGuid().ToString();
-    
-    [JsonPropertyName("documentId")]
+
+    [JsonProperty(PropertyName = "documentId")]
     public string DocumentId { get; set; } = string.Empty;
-    
-    [JsonPropertyName("tenantId")]
+
+    [JsonProperty(PropertyName ="tenantId")]
     public string TenantId { get; set; } = string.Empty;
-    
-    [JsonPropertyName("blobUrl")]
+
+    [JsonProperty(PropertyName = "blobUrl")]
     public string BlobUrl { get; set; } = string.Empty;
-    
-    [JsonPropertyName("documentType")]
+
+    [JsonProperty(PropertyName = "documentType")]
     public string? DocumentType { get; set; }
-    
-    [JsonPropertyName("sourceSystem")]
+
+    [JsonProperty(PropertyName = "sourceSystem")]
     public string SourceSystem { get; set; } = string.Empty;
-    
-    [JsonPropertyName("userId")]
+
+    [JsonProperty(PropertyName = "userId")]
     public string UserId { get; set; } = string.Empty;
-    
-    [JsonPropertyName("clientReferenceId")]
+
+    [JsonProperty(PropertyName = "clientReferenceId")]
     public string ClientReferenceId { get; set; } = string.Empty;
-    
-    [JsonPropertyName("overallStatus")]
+
+    [JsonProperty(PropertyName = "overallStatus")]
     public ProcessingStatus OverallStatus { get; set; } = ProcessingStatus.Processing;
-    
-    [JsonPropertyName("createdAt")]
+
+    [JsonProperty(PropertyName = "createdAt")]
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    
-    [JsonPropertyName("updatedAt")]
+
+    [JsonProperty(PropertyName = "updatedAt")]
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
-    
-    [JsonPropertyName("classificationResult")]
+
+    [JsonProperty(PropertyName = "classificationResult")]
     public string? ClassificationResult { get; set; }
-    
-    [JsonPropertyName("extractionResult")]
+
+    [JsonProperty(PropertyName = "extractionResult")]
     public string? ExtractionResult { get; set; }
-    
-    [JsonPropertyName("validationResult")]
+
+    [JsonProperty(PropertyName = "validationResult")]
     public string? ValidationResult { get; set; }
-    
-    [JsonPropertyName("requiresHumanReview")]
+
+    [JsonProperty(PropertyName = "requiresHumanReview")]
     public bool RequiresHumanReview { get; set; }
-    
-    [JsonPropertyName("humanReviewTaskId")]
+
+    [JsonProperty(PropertyName = "humanReviewTaskId")]
     public string? HumanReviewTaskId { get; set; }
-    
-    [JsonPropertyName("processedDataId")]
+
+    [JsonProperty(PropertyName = "processedDataId")]
     public string? ProcessedDataId { get; set; }
-    
-    [JsonPropertyName("errorMessage")]
+
+    [JsonProperty(PropertyName = "errorMessage")]
     public string? ErrorMessage { get; set; }
 }
