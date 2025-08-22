@@ -44,6 +44,7 @@ public class ProcessingJobActivities
 
         var job = new ProcessingJob
         {
+            Id = Guid.NewGuid().ToString(),
             DocumentId = input.DocumentId,
             TenantId = input.TenantId,
             BlobUrl = input.BlobUrl,
@@ -53,6 +54,8 @@ public class ProcessingJobActivities
             ClientReferenceId = input.ClientReferenceId,
             OverallStatus = ProcessingStatus.Processing
         };
+
+        _logger.LogWarning("Creating processing job with ID {id}", job.Id);
 
         var createdJob = await _repository.CreateAsync(job);
         _logger.LogInformation("Created processing job {JobId} for document {DocumentId}", 
