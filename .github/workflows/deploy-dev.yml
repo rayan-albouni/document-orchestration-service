@@ -52,7 +52,7 @@ jobs:
         run: |
           az functionapp config access-restriction add \
             --resource-group rg-document-parsing \
-            --name 'fn-document-orchestration-service' \
+            --name 'fn-document-orchestration-engine' \
             --rule-name 'GitHubRunner' \
             --action Allow \
             --ip-address ${{ steps.get-ip.outputs.runner-ip }}/32 \
@@ -62,7 +62,7 @@ jobs:
         uses: Azure/functions-action@v1
         id: fa
         with:
-          app-name: 'fn-document-orchestration-service'
+          app-name: 'fn-document-orchestration-engine'
           slot-name: 'Production'
           package: '${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}/output'
 
@@ -71,6 +71,6 @@ jobs:
         run: |
           az functionapp config access-restriction remove \
             --resource-group rg-document-parsing \
-            --name 'fn-document-orchestration-service' \
+            --name 'fn-document-orchestration-engine' \
             --rule-name 'GitHubRunner'
           
