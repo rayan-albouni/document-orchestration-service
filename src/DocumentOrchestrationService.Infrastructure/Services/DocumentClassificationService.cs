@@ -37,9 +37,10 @@ public class DocumentClassificationService : IDocumentClassificationService
 
             var responseContent = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<dynamic>(responseContent);
-            string documentType = result?.documentType?.ToString() ?? "unknown";
-            
-            _logger.LogInformation("Document {DocumentId} classified as type: {DocumentType}", documentId, documentType);
+            string documentType = result?.classification?.ToString() ?? "unknown";
+            string confidence = result?.confidence?.ToString() ?? "unknown";
+
+            _logger.LogInformation("Document {DocumentId} classified as type: {DocumentType} with confidence: {Confidence}", documentId, documentType, confidence);
             return documentType;
         }
         catch (HttpRequestException ex)
