@@ -1,3 +1,4 @@
+using System.Text.Json;
 using DocumentOrchestrationService.Domain.Repositories;
 using DocumentOrchestrationService.Domain.Services;
 using DocumentOrchestrationService.Infrastructure.Repositories;
@@ -12,6 +13,7 @@ var builder = FunctionsApplication.CreateBuilder(args);
 builder.ConfigureFunctionsWebApplication();
 builder.Services.AddApplicationInsightsTelemetryWorkerService(); 
 builder.Logging.AddApplicationInsights();
+builder.Services.Configure<JsonSerializerOptions>(o => o.IncludeFields = true);
 
 var cosmosDbConnectionString = builder.Configuration["CosmosDbConnectionString"] ?? throw new InvalidOperationException("CosmosDbConnectionString is not configured.");
 var cosmosDbDatabaseId = builder.Configuration["CosmosDbDatabaseId"] ?? throw new InvalidOperationException("CosmosDbDatabaseId is not configured.");
