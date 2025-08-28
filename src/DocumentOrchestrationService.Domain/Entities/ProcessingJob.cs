@@ -40,6 +40,9 @@ public class ProcessingJob
     [JsonProperty(PropertyName = "classificationResult")]
     public string? ClassificationResult { get; set; }
 
+    [JsonProperty(PropertyName = "classificationConfidenceScore")]
+    public double? ClassificationConfidenceScore { get; set; }
+
     [JsonProperty(PropertyName = "extractionResult")]
     public string? ExtractionResult { get; set; }
 

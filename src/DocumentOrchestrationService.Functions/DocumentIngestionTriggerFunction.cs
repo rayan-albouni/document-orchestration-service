@@ -3,24 +3,25 @@ using Microsoft.DurableTask.Client;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using DocumentOrchestrationService.Functions.Models;
+using DocumentOrchestrationService.Domain.Constants;
 
 namespace DocumentOrchestrationService.Functions;
 
-public class DocumentIngestionTrigger
+public class DocumentIngestionTriggerFunction
 {
-    private readonly ILogger<DocumentIngestionTrigger> _logger;
+    private readonly ILogger<DocumentIngestionTriggerFunction> _logger;
 
-    public DocumentIngestionTrigger(ILogger<DocumentIngestionTrigger> logger)
+    public DocumentIngestionTriggerFunction(ILogger<DocumentIngestionTriggerFunction> logger)
     {
         _logger = logger;
     }
 
     [Function("DocumentIngestionTrigger")]
     public async Task Run(
-        [ServiceBusTrigger("document-ingestion-queue", Connection = "ServiceBusConnectionString")] string message,
+        [ServiceBusTrigger(ServiceBusQueues.DocumentIngestionQueue, Connection = "ServiceBusConnectionString")] string message,
         [DurableClient] DurableTaskClient client)
     {
-        _logger.LogInformation("Document ingestion triggered with message: {MessageLength} characters", message.Length);
+        _logger.LogInformation("Async document ingestion triggered with message: {MessageLength} characters", message.Length);
 
         try
         {
@@ -33,10 +34,10 @@ public class DocumentIngestionTrigger
 
             var documentMessage = documentMessageDto.ToDomainObject();
             var instanceId = await client.ScheduleNewOrchestrationInstanceAsync(
-                "DocumentProcessingOrchestrator",
+                "AsyncDocumentProcessingOrchestrator",
                 documentMessage);
 
-            _logger.LogInformation("Started orchestration {InstanceId} for document {DocumentId}", 
+            _logger.LogInformation("Started async orchestration {InstanceId} for document {DocumentId}", 
                 instanceId, documentMessage.DocumentId);
         }
         catch (JsonException ex)
@@ -45,7 +46,7 @@ public class DocumentIngestionTrigger
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error processing document ingestion");
+            _logger.LogError(ex, "Unexpected error processing async document ingestion");
         }
     }
 }

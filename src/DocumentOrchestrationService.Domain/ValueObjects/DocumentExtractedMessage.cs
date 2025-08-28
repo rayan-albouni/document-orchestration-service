@@ -2,6 +2,7 @@ using System.Text.Json;
 
 public record DocumentExtractedMessage
 {
-    Guid DocumentId { get; set; }
-    JsonDocument ParsedData { get; set; }
+    public Guid DocumentId { get; set; }
+    public required string TenantId { get; set; }
+    public JsonDocument ParsedData { get; set; } = JsonDocument.Parse("{}");
 }

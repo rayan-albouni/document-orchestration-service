@@ -1,4 +1,4 @@
-public record DocumentToClassifyMessage
+public record DocumentToValidateMessage
 {
     public Guid DocumentId { get; set; }
     public required string TenantId { get; set; }

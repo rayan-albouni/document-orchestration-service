@@ -28,10 +28,10 @@ public class ProcessingJobRepository : IProcessingJobRepository
         }
     }
 
-    public async Task<ProcessingJob?> GetByDocumentIdAsync(string documentId)
+    public async Task<ProcessingJob?> GetByDocumentIdAsync(string id)
     {
-        var query = new QueryDefinition("SELECT * FROM c WHERE c.documentId = @documentId")
-            .WithParameter("@documentId", documentId);
+        var query = new QueryDefinition("SELECT * FROM c WHERE c.id = @id")
+            .WithParameter("@id", id);
 
         var iterator = _container.GetItemQueryIterator<ProcessingJob>(query);
         var results = await iterator.ReadNextAsync();

@@ -26,3 +26,8 @@ public interface IProcessedDataService
 {
     Task<string> StoreAndIndexDataAsync(string documentId, string tenantId, string finalData);
 }
+
+public interface IServiceBusService
+{
+    Task SendMessageAsync<T>(string queueName, T message);
+}
