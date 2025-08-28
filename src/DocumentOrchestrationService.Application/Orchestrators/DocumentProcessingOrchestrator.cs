@@ -37,7 +37,7 @@ public class DocumentProcessingOrchestrator
     public async Task<string> RunOrchestrator([OrchestrationTrigger] TaskOrchestrationContext context)
     {
         var logger = context.CreateReplaySafeLogger<DocumentProcessingOrchestrator>();
-        var input = context.GetInput<DocumentMessage>();
+        var input = context.GetInput<DocumentIngestedMessage>();
         if (input == null) 
         {
             logger.LogWarning("Orchestrator received null input");

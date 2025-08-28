@@ -8,8 +8,8 @@ public record DocumentMetadata(
     string ClientReferenceId
 );
 
-public record DocumentMessage(
-    string DocumentId,
+public record DocumentIngestedMessage(
+    Guid DocumentId,
     string BlobUrl,
     DocumentMetadata Metadata
 )

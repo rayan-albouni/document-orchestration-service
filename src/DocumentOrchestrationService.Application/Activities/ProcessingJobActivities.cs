@@ -37,15 +37,15 @@ public class ProcessingJobActivities
     }
 
     [Function("CreateProcessingJob")]
-    public async Task<ProcessingJob> CreateProcessingJob([ActivityTrigger] DocumentMessage input)
+    public async Task<ProcessingJob> CreateProcessingJob([ActivityTrigger] DocumentIngestedMessage input)
     {
         _logger.LogInformation("Creating processing job for document {DocumentId} from {SourceSystem}", 
             input.DocumentId, input.SourceSystem);
 
         var job = new ProcessingJob
         {
-            Id = Guid.NewGuid().ToString(),
-            DocumentId = input.DocumentId,
+            Id = input.DocumentId.ToString(),
+            DocumentId = input.DocumentId.ToString(),
             TenantId = input.TenantId,
             BlobUrl = input.BlobUrl,
             DocumentType = input.DocumentType,

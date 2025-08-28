@@ -24,7 +24,7 @@ public class DocumentMetadataDto
 public class DocumentMessageDto
 {
     [JsonProperty("documentId")]
-    public string DocumentId { get; set; } = string.Empty;
+    public Guid DocumentId { get; set; }
     
     [JsonProperty("blobUrl")]
     public string BlobUrl { get; set; } = string.Empty;
@@ -32,7 +32,7 @@ public class DocumentMessageDto
     [JsonProperty("metadata")]
     public DocumentMetadataDto Metadata { get; set; } = new();
 
-    public DocumentMessage ToDomainObject()
+    public DocumentIngestedMessage ToDomainObject()
     {
         var metadata = new DocumentMetadata(
             Metadata.DocumentType,
@@ -42,7 +42,7 @@ public class DocumentMessageDto
             Metadata.ClientReferenceId
         );
 
-        return new DocumentMessage(
+        return new DocumentIngestedMessage(
             DocumentId,
             BlobUrl,
             metadata
