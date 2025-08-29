@@ -34,7 +34,7 @@ public class DocumentIngestionTriggerFunction
 
             var documentMessage = documentMessageDto.ToDomainObject();
             var instanceId = await client.ScheduleNewOrchestrationInstanceAsync(
-                "AsyncDocumentProcessingOrchestrator",
+                "DocumentProcessingOrchestratorAsync",
                 documentMessage);
 
             _logger.LogInformation("Started async orchestration {InstanceId} for document {DocumentId}", 
