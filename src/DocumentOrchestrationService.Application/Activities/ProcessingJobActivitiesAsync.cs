@@ -91,7 +91,7 @@ public class ProcessingJobActivitiesAsync
         throw new InvalidOperationException($"Job not found for document {message.DocumentId}");
       }
 
-      job.ExtractionResult = message.ParsedData.ToString();
+      job.ExtractionResult = message.ParsedData.RootElement.GetRawText();
       job.OverallStatus = ProcessingStatus.Extracted;
       job.UpdatedAt = DateTime.UtcNow;
 
