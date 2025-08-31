@@ -4,16 +4,19 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using DocumentOrchestrationService.Domain.ValueObjects;
 using DocumentOrchestrationService.Domain.Constants;
+using DocumentOrchestrationService.Domain.Services;
 
 namespace DocumentOrchestrationService.Functions;
 
 public class DocumentExtractionResultsFunction
 {
     private readonly ILogger<DocumentExtractionResultsFunction> _logger;
+      private readonly IMessagingBusService _messagingBusService;
 
-    public DocumentExtractionResultsFunction(ILogger<DocumentExtractionResultsFunction> logger)
+    public DocumentExtractionResultsFunction(ILogger<DocumentExtractionResultsFunction> logger, IMessagingBusService messagingBusService)
     {
         _logger = logger;
+        _messagingBusService = messagingBusService;
     }
 
     [Function("DocumentExtractionResultsFunction")]
@@ -40,8 +43,22 @@ public class DocumentExtractionResultsFunction
                 "UpdateExtractionOrchestrator",
                 extractedMessage);
 
-            _logger.LogInformation("Started extraction update orchestration {InstanceId} for document {DocumentId}", 
+                 _logger.LogInformation("Started extraction update orchestration {InstanceId} for document {DocumentId}",
                 instanceId, extractedMessage.DocumentId);
+
+
+            // Send document to validation queue
+            var validationMessage = new DocumentToValidateMessage
+            {
+                DocumentId = extractedMessage.DocumentId,
+                TenantId = extractedMessage.TenantId,
+                DocumentType = extractedMessage.DocumentType,
+                ParsedData = extractedMessage.ParsedData
+            };
+
+            await _messagingBusService.SendMessageAsync(ServiceBusQueues.DocumentValidationQueue, validationMessage);
+            _logger.LogInformation("Sent document {DocumentId} to validation queue",
+                validationMessage.DocumentId);
         }
         catch (JsonException ex)
         {
