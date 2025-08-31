@@ -21,7 +21,7 @@ public class DocumentExtractionResultsFunction
         [ServiceBusTrigger(ServiceBusQueues.DocumentExtractionResultsQueue, Connection = "ServiceBusConnectionString")] string message,
         [DurableClient] DurableTaskClient client)
     {
-        _logger.LogInformation("Document extraction results received: {MessageLength} characters", message.Length);
+        _logger.LogInformation("Document extraction results received: {message}", message);
 
         try
         {
