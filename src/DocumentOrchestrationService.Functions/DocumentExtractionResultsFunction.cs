@@ -33,7 +33,6 @@ public class DocumentExtractionResultsFunction
             }
 
             _logger.LogInformation("Processing extraction result for document {DocumentId}", extractedMessage.DocumentId);
-            _logger.LogInformation("Extracted data for document {DocumentId}: {ExtractedData}", extractedMessage.DocumentId, extractedMessage.ParsedData.RootElement.ToString());
 
             // Update the processing job with extraction results
             var instanceId = await client.ScheduleNewOrchestrationInstanceAsync(

@@ -81,8 +81,6 @@ public class ProcessingJobActivitiesAsync
   public async Task UpdateJobExtractionAsync([ActivityTrigger] DocumentExtractedMessage message)
   {
     _logger.LogInformation("Updating job extraction for document {DocumentId}", message.DocumentId);
-    _logger.LogInformation("Updating job extraction for message {Message}", message);
-    _logger.LogInformation("Updating job extraction for message with root element {RootElement}", message.ParsedData.RootElement.GetRawText());
 
     try
     {
@@ -93,7 +91,7 @@ public class ProcessingJobActivitiesAsync
         throw new InvalidOperationException($"Job not found for document {message.DocumentId}");
       }
 
-      job.ExtractionResult = message.ParsedData.RootElement.GetRawText();
+      job.ExtractionResult = message.ParsedData;
       job.OverallStatus = ProcessingStatus.Extracted;
       job.UpdatedAt = DateTime.UtcNow;
 
