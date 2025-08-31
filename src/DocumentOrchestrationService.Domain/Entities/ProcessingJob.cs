@@ -29,6 +29,7 @@ public class ProcessingJob
     public string ClientReferenceId { get; set; } = string.Empty;
 
     [JsonProperty(PropertyName = "overallStatus")]
+    [JsonConverter(typeof(Newtonsoft.Json.Converters.StringEnumConverter))]
     public ProcessingStatus OverallStatus { get; set; } = ProcessingStatus.Processing;
 
     [JsonProperty(PropertyName = "createdAt")]
