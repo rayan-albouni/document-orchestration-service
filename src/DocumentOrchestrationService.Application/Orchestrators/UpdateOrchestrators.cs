@@ -48,6 +48,7 @@ public class UpdateExtractionOrchestrator
         }
 
         logger.LogInformation("Updating extraction for document {DocumentId}", input.DocumentId);
+        logger.LogInformation("Updating extraction for message {Message}", input);
 
         try
         {

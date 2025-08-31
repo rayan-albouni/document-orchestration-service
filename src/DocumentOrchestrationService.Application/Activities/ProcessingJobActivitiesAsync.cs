@@ -81,6 +81,8 @@ public class ProcessingJobActivitiesAsync
   public async Task UpdateJobExtractionAsync([ActivityTrigger] DocumentExtractedMessage message)
   {
     _logger.LogInformation("Updating job extraction for document {DocumentId}", message.DocumentId);
+    _logger.LogInformation("Updating job extraction for message {Message}", message);
+    _logger.LogInformation("Updating job extraction for message with root element {RootElement}", message.ParsedData.RootElement.GetRawText());
 
     try
     {

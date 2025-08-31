@@ -21,7 +21,7 @@ public class DocumentExtractionResultsFunction
         [ServiceBusTrigger(ServiceBusQueues.DocumentExtractionResultsQueue, Connection = "ServiceBusConnectionString")] string message,
         [DurableClient] DurableTaskClient client)
     {
-        _logger.LogInformation("Document extraction results received: {message}", message);
+        _logger.LogInformation("Document extraction results received: {MessageLength} characters", message.Length);
 
         try
         {
@@ -33,6 +33,7 @@ public class DocumentExtractionResultsFunction
             }
 
             _logger.LogInformation("Processing extraction result for document {DocumentId}", extractedMessage.DocumentId);
+            _logger.LogInformation("Extracted data for document {DocumentId}: {ExtractedData}", extractedMessage.DocumentId, extractedMessage.ParsedData.RootElement.ToString());
 
             // Update the processing job with extraction results
             var instanceId = await client.ScheduleNewOrchestrationInstanceAsync(
