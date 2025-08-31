@@ -25,6 +25,7 @@ public class DocumentExtractionResultsFunction
 
         try
         {
+            // Deserialize directly using DocumentExtractedMessage with custom converter
             var extractedMessage = JsonConvert.DeserializeObject<DocumentExtractedMessage>(message);
             if (extractedMessage == null)
             {
