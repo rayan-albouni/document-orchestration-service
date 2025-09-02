@@ -9,4 +9,6 @@ public static class ServiceBusQueues
     public const string DocumentExtractionResultsQueue = "document-extraction-results";
     public const string DocumentValidationQueue = "document-validation-queue";
     public const string DocumentValidationResultsQueue = "document-validation-results";
+    public const string DocumentHumanReviewQueue = "document-review-queue";
+    
 }

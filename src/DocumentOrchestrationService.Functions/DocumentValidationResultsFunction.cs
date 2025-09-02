@@ -4,15 +4,19 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using DocumentOrchestrationService.Domain.ValueObjects;
 using DocumentOrchestrationService.Domain.Constants;
+using DocumentOrchestrationService.Domain.Services;
 
 namespace DocumentOrchestrationService.Functions;
 
 public class DocumentValidationResultsFunction
 {
+
+    private readonly IMessagingBusService _messagingBusService;
     private readonly ILogger<DocumentValidationResultsFunction> _logger;
 
-    public DocumentValidationResultsFunction(ILogger<DocumentValidationResultsFunction> logger)
+    public DocumentValidationResultsFunction(IMessagingBusService messagingBusService, ILogger<DocumentValidationResultsFunction> logger)
     {
+        _messagingBusService = messagingBusService;
         _logger = logger;
     }
 
@@ -41,6 +45,13 @@ public class DocumentValidationResultsFunction
 
             _logger.LogInformation("Started validation update orchestration {InstanceId} for document {DocumentId}",
                 instanceId, validatedMessage.DocumentId);
+
+            if (!validatedMessage.IsValid)
+            {
+            await _messagingBusService.SendMessageAsync(ServiceBusQueues.DocumentHumanReviewQueue, validatedMessage);
+            _logger.LogInformation("Sent document {DocumentId} to human review queue",
+                validatedMessage.DocumentId);
+            }
         }
         catch (JsonException ex)
         {
