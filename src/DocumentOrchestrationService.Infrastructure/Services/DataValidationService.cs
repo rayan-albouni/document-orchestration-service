@@ -1,7 +1,7 @@
 using System.Text;
-using Newtonsoft.Json;
-using Microsoft.Extensions.Configuration;
 using DocumentOrchestrationService.Domain.Services;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 
 namespace DocumentOrchestrationService.Infrastructure.Services;
 
@@ -27,7 +27,7 @@ public class DataValidationService : IDataValidationService
 
         var responseContent = await response.Content.ReadAsStringAsync();
         var result = JsonConvert.DeserializeObject<dynamic>(responseContent);
-        
+
         return (
             result?.validationResult?.ToString() ?? string.Empty,
             result?.requiresHumanReview?.ToObject<bool>() ?? false

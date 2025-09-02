@@ -12,7 +12,7 @@ using Microsoft.Extensions.Logging;
 
 var builder = FunctionsApplication.CreateBuilder(args);
 builder.ConfigureFunctionsWebApplication();
-builder.Services.AddApplicationInsightsTelemetryWorkerService(); 
+builder.Services.AddApplicationInsightsTelemetryWorkerService();
 builder.Logging.AddApplicationInsights();
 builder.Services.Configure<JsonSerializerOptions>(o => o.IncludeFields = true);
 

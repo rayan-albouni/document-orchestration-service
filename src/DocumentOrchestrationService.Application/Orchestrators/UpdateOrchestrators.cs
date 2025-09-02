@@ -1,7 +1,7 @@
+using DocumentOrchestrationService.Domain.ValueObjects;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.DurableTask;
 using Microsoft.Extensions.Logging;
-using DocumentOrchestrationService.Domain.ValueObjects;
 
 namespace DocumentOrchestrationService.Application.Orchestrators;
 
@@ -12,7 +12,7 @@ public class UpdateClassificationOrchestrator
     {
         var logger = context.CreateReplaySafeLogger<UpdateClassificationOrchestrator>();
         var input = context.GetInput<DocumentClassifiedMessage>();
-        if (input == null) 
+        if (input == null)
         {
             logger.LogWarning("UpdateClassificationOrchestrator received null input");
             return "Invalid input";
@@ -41,7 +41,7 @@ public class UpdateExtractionOrchestrator
     {
         var logger = context.CreateReplaySafeLogger<UpdateExtractionOrchestrator>();
         var input = context.GetInput<DocumentExtractedMessage>();
-        if (input == null) 
+        if (input == null)
         {
             logger.LogWarning("UpdateExtractionOrchestrator received null input");
             return "Invalid input";
@@ -70,7 +70,7 @@ public class UpdateValidationOrchestrator
     {
         var logger = context.CreateReplaySafeLogger<UpdateValidationOrchestrator>();
         var input = context.GetInput<DocumentValidatedMessage>();
-        if (input == null) 
+        if (input == null)
         {
             logger.LogWarning("UpdateValidationOrchestrator received null input");
             return "Invalid input";

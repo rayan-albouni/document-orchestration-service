@@ -10,7 +10,7 @@ public class ProcessingJob
     [JsonProperty(PropertyName = "documentId")]
     public string DocumentId { get; set; } = string.Empty;
 
-    [JsonProperty(PropertyName ="tenantId")]
+    [JsonProperty(PropertyName = "tenantId")]
     public string TenantId { get; set; } = string.Empty;
 
     [JsonProperty(PropertyName = "blobUrl")]

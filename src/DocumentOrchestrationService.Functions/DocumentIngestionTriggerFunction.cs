@@ -1,9 +1,9 @@
+using DocumentOrchestrationService.Domain.Constants;
+using DocumentOrchestrationService.Functions.Models;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.DurableTask.Client;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using DocumentOrchestrationService.Functions.Models;
-using DocumentOrchestrationService.Domain.Constants;
 
 namespace DocumentOrchestrationService.Functions;
 
@@ -37,7 +37,7 @@ public class DocumentIngestionTriggerFunction
                 "DocumentProcessingOrchestratorAsync",
                 documentMessage);
 
-            _logger.LogInformation("Started async orchestration {InstanceId} for document {DocumentId}", 
+            _logger.LogInformation("Started async orchestration {InstanceId} for document {DocumentId}",
                 instanceId, documentMessage.DocumentId);
         }
         catch (JsonException ex)

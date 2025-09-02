@@ -1,10 +1,10 @@
+using System.Net;
+using DocumentOrchestrationService.Domain.Repositories;
+using DocumentOrchestrationService.Domain.ValueObjects;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 using Microsoft.Extensions.Logging;
-using System.Net;
 using Newtonsoft.Json;
-using DocumentOrchestrationService.Domain.Repositories;
-using DocumentOrchestrationService.Domain.ValueObjects;
 
 namespace DocumentOrchestrationService.Functions;
 
@@ -37,7 +37,7 @@ public class DocumentStatusFunction
                 return notFoundResponse;
             }
 
-            _logger.LogInformation("Found document {DocumentId} with status {Status} for tenant {TenantId}", 
+            _logger.LogInformation("Found document {DocumentId} with status {Status} for tenant {TenantId}",
                 documentId, job.OverallStatus, job.TenantId);
 
             var statusResponse = new DocumentStatusResponse(

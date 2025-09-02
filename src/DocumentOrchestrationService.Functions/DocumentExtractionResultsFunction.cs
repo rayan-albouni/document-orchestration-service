@@ -1,17 +1,17 @@
+using DocumentOrchestrationService.Domain.Constants;
+using DocumentOrchestrationService.Domain.Services;
+using DocumentOrchestrationService.Domain.ValueObjects;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.DurableTask.Client;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using DocumentOrchestrationService.Domain.ValueObjects;
-using DocumentOrchestrationService.Domain.Constants;
-using DocumentOrchestrationService.Domain.Services;
 
 namespace DocumentOrchestrationService.Functions;
 
 public class DocumentExtractionResultsFunction
 {
     private readonly ILogger<DocumentExtractionResultsFunction> _logger;
-      private readonly IMessagingBusService _messagingBusService;
+    private readonly IMessagingBusService _messagingBusService;
 
     public DocumentExtractionResultsFunction(ILogger<DocumentExtractionResultsFunction> logger, IMessagingBusService messagingBusService)
     {
@@ -43,8 +43,8 @@ public class DocumentExtractionResultsFunction
                 "UpdateExtractionOrchestrator",
                 extractedMessage);
 
-                 _logger.LogInformation("Started extraction update orchestration {InstanceId} for document {DocumentId}",
-                instanceId, extractedMessage.DocumentId);
+            _logger.LogInformation("Started extraction update orchestration {InstanceId} for document {DocumentId}",
+           instanceId, extractedMessage.DocumentId);
 
 
             // Send document to validation queue

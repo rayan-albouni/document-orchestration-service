@@ -1,8 +1,8 @@
+using DocumentOrchestrationService.Domain.Entities;
+using DocumentOrchestrationService.Domain.ValueObjects;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.DurableTask;
 using Microsoft.Extensions.Logging;
-using DocumentOrchestrationService.Domain.Entities;
-using DocumentOrchestrationService.Domain.ValueObjects;
 
 namespace DocumentOrchestrationService.Application.Orchestrators;
 
@@ -13,7 +13,7 @@ public class DocumentProcessingOrchestratorAsync
     {
         var logger = context.CreateReplaySafeLogger<DocumentProcessingOrchestratorAsync>();
         var input = context.GetInput<DocumentIngestedMessage>();
-        if (input == null) 
+        if (input == null)
         {
             logger.LogWarning("Orchestrator received null input");
             return "Invalid input";

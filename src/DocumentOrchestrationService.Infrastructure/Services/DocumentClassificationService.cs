@@ -1,8 +1,8 @@
 using System.Text;
-using Newtonsoft.Json;
+using DocumentOrchestrationService.Domain.Services;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using DocumentOrchestrationService.Domain.Services;
+using Newtonsoft.Json;
 
 namespace DocumentOrchestrationService.Infrastructure.Services;
 
@@ -23,7 +23,7 @@ public class DocumentClassificationService : IDocumentClassificationService
 
     public async Task<string> ClassifyDocumentAsync(string documentId, string blobUrl, string tenantId)
     {
-        _logger.LogInformation("Classifying document {DocumentId} for tenant {TenantId} from blob {BlobUrl}", 
+        _logger.LogInformation("Classifying document {DocumentId} for tenant {TenantId} from blob {BlobUrl}",
             documentId, tenantId, blobUrl);
 
         try

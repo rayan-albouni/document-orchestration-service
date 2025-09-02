@@ -1,7 +1,7 @@
 using System.Text;
-using Newtonsoft.Json;
-using Microsoft.Extensions.Configuration;
 using DocumentOrchestrationService.Domain.Services;
+using Microsoft.Extensions.Configuration;
+using Newtonsoft.Json;
 
 namespace DocumentOrchestrationService.Infrastructure.Services;
 

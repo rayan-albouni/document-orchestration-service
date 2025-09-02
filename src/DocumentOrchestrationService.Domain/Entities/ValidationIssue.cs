@@ -5,15 +5,15 @@ namespace DocumentOrchestrationService.Domain.Entities;
 
 public class ValidationIssue
 {
-  [JsonProperty("FieldName")]
-  public string FieldName { get; set; } = string.Empty;
+    [JsonProperty("FieldName")]
+    public string FieldName { get; set; } = string.Empty;
 
-  [JsonProperty("IssueType")]
-  public ValidationIssueType IssueType { get; set; }
+    [JsonProperty("IssueType")]
+    public ValidationIssueType IssueType { get; set; }
 
-  [JsonProperty("Description")]
-  public string Description { get; set; } = string.Empty;
+    [JsonProperty("Description")]
+    public string Description { get; set; } = string.Empty;
 
-  [JsonProperty("Severity")]
-  public ValidationSeverity Severity { get; set; }
+    [JsonProperty("Severity")]
+    public ValidationSeverity Severity { get; set; }
 }

@@ -5,9 +5,9 @@ public record DocumentExtractedMessage
     public Guid DocumentId { get; set; }
     public required string TenantId { get; set; }
     public required string DocumentType { get; set; }
-    
+
     [JsonConverter(typeof(ParsedDataConverter))]
-    public required string ParsedData { get; set; } 
+    public required string ParsedData { get; set; }
 }
 
 // Custom converter to handle both object and string ParsedData
@@ -30,7 +30,7 @@ public class ParsedDataConverter : JsonConverter<string>
             var jsonObject = serializer.Deserialize(reader);
             return JsonConvert.SerializeObject(jsonObject);
         }
-        
+
         return string.Empty;
     }
 }

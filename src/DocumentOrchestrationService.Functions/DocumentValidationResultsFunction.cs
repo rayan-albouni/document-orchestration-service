@@ -1,10 +1,10 @@
+using DocumentOrchestrationService.Domain.Constants;
+using DocumentOrchestrationService.Domain.Services;
+using DocumentOrchestrationService.Domain.ValueObjects;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.DurableTask.Client;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using DocumentOrchestrationService.Domain.ValueObjects;
-using DocumentOrchestrationService.Domain.Constants;
-using DocumentOrchestrationService.Domain.Services;
 
 namespace DocumentOrchestrationService.Functions;
 
@@ -48,9 +48,9 @@ public class DocumentValidationResultsFunction
 
             if (!validatedMessage.IsValid)
             {
-            await _messagingBusService.SendMessageAsync(ServiceBusQueues.DocumentHumanReviewQueue, validatedMessage);
-            _logger.LogInformation("Sent document {DocumentId} to human review queue",
-                validatedMessage.DocumentId);
+                await _messagingBusService.SendMessageAsync(ServiceBusQueues.DocumentHumanReviewQueue, validatedMessage);
+                _logger.LogInformation("Sent document {DocumentId} to human review queue",
+                    validatedMessage.DocumentId);
             }
         }
         catch (JsonException ex)

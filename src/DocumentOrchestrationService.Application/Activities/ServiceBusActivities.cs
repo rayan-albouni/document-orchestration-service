@@ -1,8 +1,8 @@
+using DocumentOrchestrationService.Domain.Constants;
+using DocumentOrchestrationService.Domain.Services;
+using DocumentOrchestrationService.Domain.ValueObjects;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using DocumentOrchestrationService.Domain.ValueObjects;
-using DocumentOrchestrationService.Domain.Services;
-using DocumentOrchestrationService.Domain.Constants;
 
 namespace DocumentOrchestrationService.Application.Activities;
 
@@ -21,7 +21,7 @@ public class ServiceBusActivities
     public async Task SendDocumentToClassificationQueue([ActivityTrigger] DocumentToClassifyMessage message)
     {
         _logger.LogInformation("Sending document {DocumentId} to classification queue", message.DocumentId);
-        
+
         try
         {
             await _serviceBusService.SendMessageAsync(ServiceBusQueues.DocumentClassificationQueue, message);
@@ -38,7 +38,7 @@ public class ServiceBusActivities
     public async Task SendDocumentToExtractionQueue([ActivityTrigger] DocumentToExtractMessage message)
     {
         _logger.LogInformation("Sending document {DocumentId} to extraction queue", message.DocumentId);
-        
+
         try
         {
             await _serviceBusService.SendMessageAsync(ServiceBusQueues.DocumentExtractionQueue, message);

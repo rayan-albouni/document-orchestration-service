@@ -1,8 +1,8 @@
+using DocumentOrchestrationService.Domain.Entities;
+using DocumentOrchestrationService.Domain.Repositories;
+using DocumentOrchestrationService.Domain.ValueObjects;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Extensions.Logging;
-using DocumentOrchestrationService.Domain.Entities;
-using DocumentOrchestrationService.Domain.ValueObjects;
-using DocumentOrchestrationService.Domain.Repositories;
 
 namespace DocumentOrchestrationService.Application.Activities;
 
@@ -108,23 +108,37 @@ public class ProcessingJobActivitiesAsync
   [Function("UpdateJobValidationAsync")]
   public async Task UpdateJobValidationAsync([ActivityTrigger] DocumentValidatedMessage message)
   {
+    _logger.LogInformation("Updating job validation for document {DocumentId}", message.DocumentId);
+
     var job = await _repository.GetByIdAndTenantIdAsync(message.DocumentId.ToString(), message.TenantId);
+    if (job == null)
+    {
+      _logger.LogError("Job not found for document {DocumentId} during validation update", message.DocumentId);
+      throw new InvalidOperationException($"Job not found for document {message.DocumentId}");
+    }
+    try
+    {
+      job.ValidationResult = string.Join(", ", message.Issues.Select(i => $"{i.FieldName}: {i.Description} ({i.Severity})"));
+      job.RequiresHumanReview = !message.IsValid;
+      job.OverallStatus = message.IsValid ? ProcessingStatus.Validated : ProcessingStatus.PendingHumanReview;
+      await _repository.UpdateAsync(job);
+    }
+    catch (Exception ex)
+    {
+      _logger.LogError(ex, "Failed to update job validation for document {DocumentId}", message.DocumentId);
+      throw;
+    }
+
+  }
+
+  [Function("FailJobAsync")]
+  public async Task FailJobAsync([ActivityTrigger] (string documentId, string tenantId, string errorMessage) input)
+  {
+    var job = await _repository.GetByIdAndTenantIdAsync(input.documentId, input.tenantId);
     if (job == null) return;
 
-    job.ValidationResult = string.Join(", ", message.Issues.Select(i => $"{i.FieldName}: {i.Description} ({i.Severity})"));
-    job.RequiresHumanReview = !message.IsValid;
-    job.OverallStatus = message.IsValid ? ProcessingStatus.Validated : ProcessingStatus.PendingHumanReview;
+    job.ErrorMessage = input.errorMessage;
+    job.OverallStatus = ProcessingStatus.Failed;
     await _repository.UpdateAsync(job);
   }
-    
-    [Function("FailJobAsync")]
-    public async Task FailJobAsync([ActivityTrigger] (string documentId, string tenantId, string errorMessage) input)
-    {
-        var job = await _repository.GetByIdAndTenantIdAsync(input.documentId, input.tenantId);
-        if (job == null) return;
-
-        job.ErrorMessage = input.errorMessage;
-        job.OverallStatus = ProcessingStatus.Failed;
-        await _repository.UpdateAsync(job);
-    }
 }

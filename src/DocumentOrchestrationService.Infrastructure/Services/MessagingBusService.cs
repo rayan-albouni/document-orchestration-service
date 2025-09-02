@@ -1,7 +1,7 @@
 using Azure.Messaging.ServiceBus;
+using DocumentOrchestrationService.Domain.Services;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
-using DocumentOrchestrationService.Domain.Services;
 
 namespace DocumentOrchestrationService.Infrastructure.Services;
 
@@ -30,12 +30,12 @@ public class MessagingBusService : IMessagingBusService
 
         try
         {
-            _logger.LogDebug("Sending message to queue {QueueName} for message type {MessageType}", 
+            _logger.LogDebug("Sending message to queue {QueueName} for message type {MessageType}",
                 queueName, typeof(T).Name);
 
             // Serialize the message to JSON
             var messageBody = JsonConvert.SerializeObject(message);
-            
+
             // Create a Service Bus message
             var serviceBusMessage = new ServiceBusMessage(messageBody)
             {
@@ -51,24 +51,24 @@ public class MessagingBusService : IMessagingBusService
             await using var sender = _serviceBusClient.CreateSender(queueName);
             await sender.SendMessageAsync(serviceBusMessage);
 
-            _logger.LogInformation("Successfully sent message {MessageId} to queue {QueueName}", 
+            _logger.LogInformation("Successfully sent message {MessageId} to queue {QueueName}",
                 serviceBusMessage.MessageId, queueName);
         }
         catch (ServiceBusException ex)
         {
-            _logger.LogError(ex, "Service Bus error occurred while sending message to queue {QueueName}: {ErrorReason}", 
+            _logger.LogError(ex, "Service Bus error occurred while sending message to queue {QueueName}: {ErrorReason}",
                 queueName, ex.Reason);
             throw;
         }
         catch (JsonException ex)
         {
-            _logger.LogError(ex, "JSON serialization error occurred while sending message to queue {QueueName}", 
+            _logger.LogError(ex, "JSON serialization error occurred while sending message to queue {QueueName}",
                 queueName);
             throw new InvalidOperationException($"Failed to serialize message for queue {queueName}", ex);
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Unexpected error occurred while sending message to queue {QueueName}", 
+            _logger.LogError(ex, "Unexpected error occurred while sending message to queue {QueueName}",
                 queueName);
             throw;
         }
