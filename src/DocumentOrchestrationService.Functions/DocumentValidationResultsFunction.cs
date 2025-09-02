@@ -21,7 +21,7 @@ public class DocumentValidationResultsFunction
         [ServiceBusTrigger(ServiceBusQueues.DocumentValidationResultsQueue, Connection = "ServiceBusConnectionString")] string message,
         [DurableClient] DurableTaskClient client)
     {
-        _logger.LogInformation("Document extraction results received: {MessageLength} characters", message.Length);
+        _logger.LogInformation("Document validation results received: {MessageLength} characters", message.Length);
 
         try
         {

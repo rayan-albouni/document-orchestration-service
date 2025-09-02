@@ -62,3 +62,32 @@ public class UpdateExtractionOrchestrator
         }
     }
 }
+
+public class UpdateValidationOrchestrator
+{
+    [Function("UpdateValidationOrchestrator")]
+    public async Task<string> RunOrchestrator([OrchestrationTrigger] TaskOrchestrationContext context)
+    {
+        var logger = context.CreateReplaySafeLogger<UpdateValidationOrchestrator>();
+        var input = context.GetInput<DocumentValidatedMessage>();
+        if (input == null) 
+        {
+            logger.LogWarning("UpdateValidationOrchestrator received null input");
+            return "Invalid input";
+        }
+
+        logger.LogInformation("Updating validation for document {DocumentId}", input.DocumentId);
+
+        try
+        {
+            await context.CallActivityAsync("UpdateJobValidationAsync", input);
+            logger.LogInformation("Successfully updated validation for document {DocumentId}", input.DocumentId);
+            return "Validation updated successfully";
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to update validation for document {DocumentId}", input.DocumentId);
+            return $"Validation update failed: {ex.Message}";
+        }
+    }
+}

@@ -111,9 +111,9 @@ public class ProcessingJobActivitiesAsync
     var job = await _repository.GetByIdAndTenantIdAsync(message.DocumentId.ToString(), message.TenantId);
     if (job == null) return;
 
-    job.ValidationResult = message.ValidationResult;
-    job.RequiresHumanReview = message.RequiresReview;
-    job.OverallStatus = message.RequiresReview ? ProcessingStatus.PendingHumanReview : ProcessingStatus.Validated;
+    job.ValidationResult = string.Join(", ", message.Issues.Select(i => $"{i.FieldName}: {i.Description} ({i.Severity})"));
+    job.RequiresHumanReview = !message.IsValid;
+    job.OverallStatus = message.IsValid ? ProcessingStatus.Validated : ProcessingStatus.PendingHumanReview;
     await _repository.UpdateAsync(job);
   }
     
