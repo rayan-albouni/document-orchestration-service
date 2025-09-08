@@ -1,5 +1,6 @@
 using DocumentOrchestrationService.Domain.Entities;
 using DocumentOrchestrationService.Domain.Repositories;
+using DocumentOrchestrationService.Domain.ValueObjects;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Extensions.Logging;
 
@@ -57,5 +58,94 @@ public class ProcessingJobRepository : IProcessingJobRepository
         job.UpdatedAt = DateTime.UtcNow;
         var response = await _container.ReplaceItemAsync(job, job.Id, new PartitionKey(job.TenantId));
         return response.Resource;
+    }
+
+    public async Task<PaginatedDocumentsResponse> GetDocumentsByTenantAsync(DocumentsQueryRequest request)
+    {
+        _logger.LogInformation("Retrieving documents for tenant {TenantId} with page size {PageSize}",
+            request.TenantId, request.PageSize);
+
+        try
+        {
+            // Simple partition-scoped query with sorting for optimal performance
+            // Since tenantId is the partition key, we only need to scan within the partition
+            var sortField = request.SortBy?.ToLowerInvariant() switch
+            {
+                "createdat" => "c.createdAt",
+                "updatedat" => "c.updatedAt",
+                "documenttype" => "c.documentType",
+                "status" => "c.overallStatus",
+                _ => "c.createdAt"
+            };
+
+            var sortDirection = request.SortOrder?.ToLowerInvariant() == "asc" ? "ASC" : "DESC";
+            var queryText = $"SELECT * FROM c ORDER BY {sortField} {sortDirection}";
+
+            var queryDefinition = new QueryDefinition(queryText);
+
+            // Create query request options with partition key for single-partition query
+            var requestOptions = new QueryRequestOptions
+            {
+                MaxItemCount = request.PageSize,
+                PartitionKey = new PartitionKey(request.TenantId) // This ensures we only query the specific partition
+            };
+
+            var iterator = _container.GetItemQueryIterator<ProcessingJob>(
+                queryDefinition,
+                request.ContinuationToken,
+                requestOptions);
+
+            var documents = new List<DocumentSummary>();
+            string? continuationToken = null;
+            bool hasMoreResults = false;
+
+            if (iterator.HasMoreResults)
+            {
+                var response = await iterator.ReadNextAsync();
+
+                foreach (var job in response)
+                {
+                    documents.Add(new DocumentSummary(
+                        job.DocumentId,
+                        job.TenantId,
+                        job.DocumentType,
+                        job.SourceSystem,
+                        job.UserId,
+                        job.ClientReferenceId,
+                        job.OverallStatus,
+                        job.CreatedAt,
+                        job.UpdatedAt,
+                        job.RequiresHumanReview,
+                        job.ErrorMessage
+                    ));
+                }
+
+                continuationToken = response.ContinuationToken;
+                hasMoreResults = !string.IsNullOrEmpty(continuationToken);
+            }
+
+            _logger.LogInformation("Retrieved {DocumentCount} documents for tenant {TenantId}",
+                documents.Count, request.TenantId);
+
+            return new PaginatedDocumentsResponse(
+                documents,
+                documents.Count, // Page count, not total count
+                request.PageSize,
+                continuationToken,
+                hasMoreResults
+            );
+        }
+        catch (CosmosException ex)
+        {
+            _logger.LogError(ex, "Cosmos DB error occurred while retrieving documents for tenant {TenantId}",
+                request.TenantId);
+            throw;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Unexpected error occurred while retrieving documents for tenant {TenantId}",
+                request.TenantId);
+            throw;
+        }
     }
 }

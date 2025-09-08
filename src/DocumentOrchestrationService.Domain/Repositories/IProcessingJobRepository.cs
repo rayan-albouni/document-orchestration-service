@@ -1,4 +1,5 @@
 using DocumentOrchestrationService.Domain.Entities;
+using DocumentOrchestrationService.Domain.ValueObjects;
 
 namespace DocumentOrchestrationService.Domain.Repositories;
 
@@ -9,4 +10,5 @@ public interface IProcessingJobRepository
     Task<ProcessingJob?> GetByDocumentIdAsync(string documentId);
     Task<ProcessingJob> CreateAsync(ProcessingJob job);
     Task<ProcessingJob> UpdateAsync(ProcessingJob job);
+    Task<PaginatedDocumentsResponse> GetDocumentsByTenantAsync(DocumentsQueryRequest request);
 }
