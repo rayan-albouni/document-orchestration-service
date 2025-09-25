@@ -40,7 +40,10 @@ GET /api/v1/tenants/tenant-123/documents?pageSize=20&sortBy=CreatedAt&sortOrder=
       "createdAt": "2025-09-08T10:30:00Z",
       "updatedAt": "2025-09-08T11:00:00Z",
       "requiresHumanReview": false,
-      "errorMessage": null
+      "errorMessage": null,
+      "blobUrl": "https://storage.example.com/docs/doc-123.pdf",
+      "classificationResult": "Invoice",
+      "classificationConfidenceScore": 0.95
     }
   ],
   "pageCount": 20,
