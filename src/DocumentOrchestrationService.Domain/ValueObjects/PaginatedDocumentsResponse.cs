@@ -15,7 +15,8 @@ public record DocumentSummary(
     bool RequiresHumanReview,
     string? ErrorMessage,
     string BlobUrl,
-    string? ClassificationResult
+    string? ClassificationResult,
+    double? ClassificationConfidenceScore
 );
 
 public record PaginatedDocumentsResponse(

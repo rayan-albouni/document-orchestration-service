@@ -118,7 +118,8 @@ public class ProcessingJobRepository : IProcessingJobRepository
                         job.RequiresHumanReview,
                         job.ErrorMessage,
                         job.BlobUrl,
-                        job.ClassificationResult
+                        job.ClassificationResult,
+                        job.ClassificationConfidenceScore
                     ));
                 }
 
