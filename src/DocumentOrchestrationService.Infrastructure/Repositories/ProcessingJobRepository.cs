@@ -116,7 +116,9 @@ public class ProcessingJobRepository : IProcessingJobRepository
                         job.CreatedAt,
                         job.UpdatedAt,
                         job.RequiresHumanReview,
-                        job.ErrorMessage
+                        job.ErrorMessage,
+                        job.BlobUrl,
+                        job.ClassificationResult
                     ));
                 }
 
