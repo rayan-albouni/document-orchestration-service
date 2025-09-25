@@ -13,7 +13,9 @@ public record DocumentSummary(
     DateTime CreatedAt,
     DateTime UpdatedAt,
     bool RequiresHumanReview,
-    string? ErrorMessage
+    string? ErrorMessage,
+    string BlobUrl,
+    string? ClassificationResult
 );
 
 public record PaginatedDocumentsResponse(
