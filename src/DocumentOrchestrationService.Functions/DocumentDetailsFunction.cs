@@ -8,23 +8,23 @@ using Newtonsoft.Json;
 
 namespace DocumentOrchestrationService.Functions;
 
-public class DocumentStatusFunction
+public class DocumentDetailsFunction
 {
     private readonly IProcessingJobRepository _repository;
-    private readonly ILogger<DocumentStatusFunction> _logger;
+    private readonly ILogger<DocumentDetailsFunction> _logger;
 
-    public DocumentStatusFunction(IProcessingJobRepository repository, ILogger<DocumentStatusFunction> logger)
+    public DocumentDetailsFunction(IProcessingJobRepository repository, ILogger<DocumentDetailsFunction> logger)
     {
         _repository = repository;
         _logger = logger;
     }
 
-    [Function("GetDocumentStatus")]
-    public async Task<HttpResponseData> GetDocumentStatus(
-        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "api/v1/documents/{documentId}/status")] HttpRequestData req,
+    [Function("GetDocumentDetails")]
+    public async Task<HttpResponseData> GetDocumentDetails(
+        [HttpTrigger(AuthorizationLevel.Function, "get", Route = "api/v1/documents/{documentId}/details")] HttpRequestData req,
         string documentId)
     {
-        _logger.LogInformation("Status requested for document {DocumentId}", documentId);
+        _logger.LogInformation("Details requested for document {DocumentId}", documentId);
 
         try
         {
@@ -40,25 +40,35 @@ public class DocumentStatusFunction
             _logger.LogInformation("Found document {DocumentId} with status {Status} for tenant {TenantId}",
                 documentId, job.OverallStatus, job.TenantId);
 
-            var statusResponse = new DocumentStatusResponse(
+            var detailsResponse = new DocumentDetailsResponse(
                 job.DocumentId,
                 job.TenantId,
+                job.BlobUrl,
+                job.DocumentType,
+                job.SourceSystem,
+                job.UserId,
+                job.ClientReferenceId,
                 job.OverallStatus.ToString(),
                 job.CreatedAt,
                 job.UpdatedAt,
+                job.ClassificationResult,
+                job.ClassificationConfidenceScore,
+                job.ExtractionResult,
+                job.ValidationResult,
                 job.RequiresHumanReview,
                 job.HumanReviewTaskId,
+                job.ProcessedDataId,
                 job.ErrorMessage
             );
 
             var response = req.CreateResponse(HttpStatusCode.OK);
             response.Headers.Add("Content-Type", "application/json");
-            await response.WriteStringAsync(JsonConvert.SerializeObject(statusResponse));
+            await response.WriteStringAsync(JsonConvert.SerializeObject(detailsResponse));
             return response;
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error retrieving status for document {DocumentId}", documentId);
+            _logger.LogError(ex, "Error retrieving details for document {DocumentId}", documentId);
             var errorResponse = req.CreateResponse(HttpStatusCode.InternalServerError);
             await errorResponse.WriteStringAsync(JsonConvert.SerializeObject(new { error = ex.Message }));
             return errorResponse;
